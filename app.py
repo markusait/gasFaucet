@@ -10,6 +10,11 @@ def index():
 #handeling parameters
 @app.route('/fill-wallet-for-gas/', methods=['GET'])
 def returnQuery():
+    #things to consider:
+    # if request.method == 'GET':
+    # print(request.query_string)
+    args = request.args.to_dict()
+    print(args)
     try:
         #handeling invalid request parameter
         if not request.args.get('gas_needed'):
@@ -27,7 +32,7 @@ def returnQuery():
         return jsonify({"gas requested": gasNeeded}, {"public address": address}, {"speed requested": speedNeeded}, {"ethNeeded in Wei": ethNeeded})
     #handleing exceptions
     except Exception:
-        raise InvalidUsage('Invalid input', status_code=500)
+        raise InvalidUsage('Invalid input', status_code=400)
 
 #handeling invalid routes
 @app.errorhandler(404)
