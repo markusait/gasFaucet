@@ -10,11 +10,9 @@ def index():
 #handeling parameters
 @app.route('/fill-wallet-for-gas/', methods=['GET'])
 def returnQuery():
-    #things to consider:
     # if request.method == 'GET':
     # print(request.query_string)
-    args = request.args.to_dict()
-    print(args)
+    #args = request.args.to_dict()
     try:
         #handeling invalid request parameter
         if not request.args.get('gas_needed'):
@@ -29,7 +27,8 @@ def returnQuery():
         speedNeeded = request.args.get('tx_speed')
 
         ethNeeded = calcEthNeeded(gasNeeded, speedNeeded)
-        return jsonify({"gas requested": gasNeeded}, {"public address": address}, {"speed requested": speedNeeded}, {"ethNeeded in Wei": ethNeeded})
+        txHash = sendTransaction(ethNeeded)
+        return jsonify({"gas requested": gasNeeded}, {"public address": address}, {"speed requested": speedNeeded}, {"ethNeeded in Wei": ethNeeded}, {"result:": txHash})
     #handleing exceptions
     except Exception:
         raise InvalidUsage('Invalid input', status_code=400)
