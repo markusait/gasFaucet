@@ -40,7 +40,7 @@ def calcEthNeeded(gasNeeded, speed):
        gasPrice = we3.eth.generateGasPrice()
        return (gasPrice * gasNeeded) /  (10 ** 9)
 
-print(calcEthNeeded(10000,'medium'))
+#print(calcEthNeeded(10000,'medium'))
 #stop = timeit.default_timer()
 #print('Time: ', stop - start)
 
