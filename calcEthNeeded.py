@@ -4,17 +4,19 @@ from web3.auto import w3
 from web3.middleware import geth_poa_middleware
 from web3.gas_strategies.time_based import fast_gas_price_strategy, slow_gas_price_strategy,medium_gas_price_strategy
 from web3.gas_strategies.rpc import rpc_gas_price_strategy
- 
- 
+import os
+
 #print(rpc_gas_price_strategy(we3))
- 
- 
+
+
 #import timeit
 #start = timeit.default_timer()
- 
+
 w3.eth.enable_unaudited_features()
- 
-we3 = Web3(Web3.HTTPProvider("https://ropsten.infura.io/3cad50878c924727bcc2cc0fb99cf3960"))
+token = os.environ['INFURA_TOKEN']
+url = "https://ropsten.infura.io/%s" % token
+we3 = Web3(Web3.HTTPProvider(url))
+
 #we3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8545"))
 we3.eth.enable_unaudited_features()
 
