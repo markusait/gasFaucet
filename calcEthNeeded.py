@@ -54,17 +54,18 @@ def calcEthNeeded(gasNeeded, speed):
        gasPrice = w3.eth.generateGasPrice()
        print(gasPrice)
        #s.enter(20, 1, calcEthNeeded, (1000, 'fast'))
-       return (gasPrice * gasNeeded) /  (10 ** 9)
+       return [{"Eth sent in Wei": gasPrice * gasNeeded}, {"gasPrice in GWei": gasPrice / 10**9}]
    if speed =='medium':
        w3.eth.setGasPriceStrategy(medium_gas_price_strategy)
        gasPrice = w3.eth.generateGasPrice()
        print(gasPrice)
-       return (gasPrice * gasNeeded) /  (10 ** 9)
+       return [{"Eth sent in Wei": gasPrice * gasNeeded}, {"gasPrice in GWei": gasPrice / 10**9}]
    if speed == 'slow':
        w3.eth.setGasPriceStrategy(slow_gas_price_strategy)
        gasPrice = w3.eth.generateGasPrice()
        print(gasPrice)
-       return (gasPrice * gasNeeded) /  (10 ** 9)
+       return [{"Eth sent in Wei": gasPrice * gasNeeded}, {"gasPrice in GWei": gasPrice / 10**9}]
+
 
 
 

@@ -5,7 +5,7 @@ app = Flask(__name__)
 
 @app.route('/', methods=['GET'])
 def index():
-    return jsonify({'message': 'It works!'},{"example request": "http://api.digitpay.de/fill-wallet-for-gas?gas_needed=10000&tx_speed=medium&public_address=0x516F329EC1fF7BF6882dE762A14eb94491FA4D8d"})
+    return jsonify({"message": "It works!"},{"available speed parameters":"fast, medium, slow"},{"example request": "http://api.digitpay.de/fill-wallet-for-gas?gas_needed=10000&tx_speed=medium&public_address=0x516F329EC1fF7BF6882dE762A14eb94491FA4D8d"})
 
 #handeling parameters
 @app.route('/fill-wallet-for-gas', methods=['GET'])
@@ -25,9 +25,9 @@ def returnQuery():
         address = request.args.get('public_address')
         speedNeeded = request.args.get('tx_speed')
 
-        ethNeeded = calcEthNeeded(gasNeeded, speedNeeded)
+        calculation = calcEthNeeded(gasNeeded, speedNeeded)
         #txHash = sendTransaction(ethNeeded)
-        return jsonify({"gas requested": gasNeeded}, {"public address": address}, {"speed requested": speedNeeded}, {"ethNeeded in Wei": ethNeeded}, {"result:": 'txHash'})
+        return jsonify({"gas requested": gasNeeded}, {"public address": address}, {"speed requested": speedNeeded}, {"Eth sent in Wei": calculation[0]["Eth sent in Wei"]}, {"gasPrice in GWei": calculation[1]["gasPrice in GWei"] }, {"result:": 'txHash'})
     #handleing exceptions
     except Exception:
         raise InvalidUsage('Invalid input', status_code=400)

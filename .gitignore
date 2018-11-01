@@ -3,3 +3,5 @@ venv/
 __pycache__/
 secondtest.py
 testing.py
+gasFaucet_uwsgi.sock
+gasFaucet_uwsgi.ini
