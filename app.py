@@ -8,7 +8,7 @@ def index():
     return jsonify({'message': 'It works!'},{"example request": "http://localhost:8000/fill-wallet-for-gas?gas_needed=10000&tx_speed=medium&public_address=0x516F329EC1fF7BF6882dE762A14eb94491FA4D8d"})
 
 #handeling parameters
-@app.route('/fill-wallet-for-gas/', methods=['GET'])
+@app.route('/fill-wallet-for-gas', methods=['GET'])
 def returnQuery():
     # if request.method == 'GET':
     # print(request.query_string)
@@ -27,8 +27,8 @@ def returnQuery():
         speedNeeded = request.args.get('tx_speed')
 
         ethNeeded = calcEthNeeded(gasNeeded, speedNeeded)
-        txHash = sendTransaction(ethNeeded)
-        return jsonify({"gas requested": gasNeeded}, {"public address": address}, {"speed requested": speedNeeded}, {"ethNeeded in Wei": ethNeeded}, {"result:": txHash})
+        #txHash = sendTransaction(ethNeeded)
+        return jsonify({"gas requested": gasNeeded}, {"public address": address}, {"speed requested": speedNeeded}, {"ethNeeded in Wei": ethNeeded}, {"result:": 'txHash'})
     #handleing exceptions
     except Exception:
         raise InvalidUsage('Invalid input', status_code=400)
@@ -38,7 +38,7 @@ def returnQuery():
 def not_found(error):
     return jsonify({"error": "page not found"})
 
-
+#handeling internal server errors
 @app.errorhandler(500)
 def internal_server_error(error):
     return jsonify({"error": "internal server error"})

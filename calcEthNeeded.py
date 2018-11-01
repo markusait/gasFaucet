@@ -17,12 +17,12 @@ import threading
 w3.eth.enable_unaudited_features()
 token = os.environ['INFURA_TOKEN']
 url = "https://ropsten.infura.io/%s" % token
-#w3 = Web3(Web3.HTTPProvider(url))
-w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8545"))
+w3 = Web3(Web3.HTTPProvider(url))
+#w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8545"))
 
 w3.eth.setGasPriceStrategy(fast_gas_price_strategy)
 #setting ttl to < 0.000001 will show the effect
-cache = TTLCache(maxsize=10000, ttl=20)
+cache = TTLCache(maxsize=10000, ttl=60)
 
 
 @cached(cache, key=partial(hashkey, 'gas'))
@@ -52,7 +52,7 @@ def set_interval(func, sec):
     t.start()
     return t
 
-set_interval(calcEthNeeded,5)
+set_interval(calcEthNeeded,10)
 
 
 
