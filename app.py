@@ -5,12 +5,11 @@ app = Flask(__name__)
 
 @app.route('/', methods=['GET'])
 def index():
-    return jsonify({'message': 'It works!'},{"example request": "http://localhost:8000/fill-wallet-for-gas?gas_needed=10000&tx_speed=medium&public_address=0x516F329EC1fF7BF6882dE762A14eb94491FA4D8d"})
+    return jsonify({'message': 'It works!'},{"example request": "http://api.digitpay.de/fill-wallet-for-gas?gas_needed=10000&tx_speed=medium&public_address=0x516F329EC1fF7BF6882dE762A14eb94491FA4D8d"})
 
 #handeling parameters
 @app.route('/fill-wallet-for-gas', methods=['GET'])
 def returnQuery():
-    # if request.method == 'GET':
     # print(request.query_string)
     #args = request.args.to_dict()
     try:

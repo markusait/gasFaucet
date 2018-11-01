@@ -10,9 +10,9 @@ from cachetools import TTLCache, cachedmethod, cached, LRUCache
 from functools import partial
 from cachetools.keys import hashkey
 import functools
-import threading
+#import threading
 import cachetools.func
-
+#import sched, time
 
 #import timeit
 #start = timeit.default_timer()
@@ -28,7 +28,7 @@ w3.eth.setGasPriceStrategy(fast_gas_price_strategy)
 #cache = TTLCache(maxsize=10000, ttl=60)
 #cache = LRUCache(maxsize=10000)
 
-
+print(w3)
 def testBool(method,params,response):
         return True
 
@@ -47,14 +47,13 @@ w3.middleware_stack.add(block_hash_cache_middleware)
 
 
 
-
-
 #@cached(cache, key=partial(hashkey, 'gas'))
 def calcEthNeeded(gasNeeded, speed):
    if speed == 'fast':
        w3.eth.setGasPriceStrategy(fast_gas_price_strategy)
        gasPrice = w3.eth.generateGasPrice()
        print(gasPrice)
+       #s.enter(20, 1, calcEthNeeded, (1000, 'fast'))
        return (gasPrice * gasNeeded) /  (10 ** 9)
    if speed =='medium':
        w3.eth.setGasPriceStrategy(medium_gas_price_strategy)
@@ -69,19 +68,22 @@ def calcEthNeeded(gasNeeded, speed):
 
 
 
+#s = sched.scheduler(time.time, time.sleep)
+#s.enter(20, 1, calcEthNeeded, (1000, 'fast'))
+#s.run()
 
+#def set_interval(func, sec):
+#    def func_wrapper():
+#        set_interval(func, sec)
+#        func(1000, 'fast')
+#    t = threading.Timer(sec, func_wrapper)
+#    t.start()
+#    return t
 
-def set_interval(func, sec):
-    def func_wrapper():
-        set_interval(func, sec)
-        print(func(1000, 'fast'))
-    t = threading.Timer(sec, func_wrapper)
-    t.start()
-    return t
-
+#print('reeching')
 #initializing
-#calcEthNeeded(1000,'fast')
-#set_interval(calcEthNeeded,10)
+print(calcEthNeeded(1000,'medium'))
+#set_interval(calcEthNeeded,20)
 
 
 

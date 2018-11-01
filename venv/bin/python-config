@@ -1,4 +1,4 @@
-#!/root/gasFaucet/venv/bin/python
+#!/var/www/gasFaucet/venv/bin/python
 
 import sys
 import getopt
