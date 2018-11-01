@@ -21,6 +21,7 @@ w3 = Web3(Web3.HTTPProvider(url))
 #w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8545"))
 
 w3.eth.setGasPriceStrategy(fast_gas_price_strategy)
+#setting ttl to < 0.000001 will show the effect
 cache = TTLCache(maxsize=10000, ttl=600)
 
 
@@ -30,19 +31,13 @@ def gas_price():
         gasPrice =  w3.eth.generateGasPrice()
         return gasPrice
 
-for i in range(0,50):
-         print(gas_price())
-         print(cache)
-print(gas_price())
-print(cache)
 
 
-
+@cached(cache, key=partial(hashkey, 'gas'))
 def calcEthNeeded(gasNeeded, speed):
    if speed == 'fast':
-       w3.eth.setGasPriceStrategy(rpc_gas_price_strategy)
+       w3.eth.setGasPriceStrategy(fast_gas_price_strategy)
        gasPrice = w3.eth.generateGasPrice()
-       we3.middleware_stack.inject(geth_poa_middleware, layer=0)
        return (gasPrice * gasNeeded) /  (10 ** 9)
    if speed =='medium':
        w3.eth.setGasPriceStrategy(medium_gas_price_strategy)
@@ -52,6 +47,15 @@ def calcEthNeeded(gasNeeded, speed):
        w3.eth.setGasPriceStrategy(slow_gas_price_strategy)
        gasPrice = w3.eth.generateGasPrice()
        return (gasPrice * gasNeeded) /  (10 ** 9)
+
+def variousStratLoop():
+    for i in range(0,50):
+        print(calcEthNeeded(1000, 'fast'))
+        print(calcEthNeeded(1000, 'medium'))
+        print(calcEthNeeded(1000, 'slow'))
+
+variousStratLoop()
+
 
 #print(calcEthNeeded(10000,'fast'))
 #stop = timeit.default_timer()
