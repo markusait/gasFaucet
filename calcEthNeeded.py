@@ -9,6 +9,7 @@ from cachetools import TTLCache, cachedmethod
 from functools import partial
 from cachetools import cached, LRUCache
 from cachetools.keys import hashkey
+import threading
 
 #import timeit
 #start = timeit.default_timer()
@@ -16,12 +17,12 @@ from cachetools.keys import hashkey
 w3.eth.enable_unaudited_features()
 token = os.environ['INFURA_TOKEN']
 url = "https://ropsten.infura.io/%s" % token
-w3 = Web3(Web3.HTTPProvider(url))
-#w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8545"))
+#w3 = Web3(Web3.HTTPProvider(url))
+w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8545"))
 
 w3.eth.setGasPriceStrategy(fast_gas_price_strategy)
 #setting ttl to < 0.000001 will show the effect
-cache = TTLCache(maxsize=10000, ttl=600)
+cache = TTLCache(maxsize=10000, ttl=20)
 
 
 @cached(cache, key=partial(hashkey, 'gas'))
@@ -39,13 +40,25 @@ def calcEthNeeded(gasNeeded, speed):
        gasPrice = w3.eth.generateGasPrice()
        return (gasPrice * gasNeeded) /  (10 ** 9)
 
-def variousStratLoop():
-    for i in range(0,50):
-        print(calcEthNeeded(1000, 'fast'))
-        print(calcEthNeeded(1000, 'medium'))
-        print(calcEthNeeded(1000, 'slow'))
 
-variousStratLoop()
+
+
+
+def set_interval(func, sec):
+    def func_wrapper():
+        set_interval(func, sec)
+        print(func(1000, 'fast'))
+    t = threading.Timer(sec, func_wrapper)
+    t.start()
+    return t
+
+set_interval(calcEthNeeded,5)
+
+
+
+
+
+
 
 
 #print(calcEthNeeded(10000,'fast'))
