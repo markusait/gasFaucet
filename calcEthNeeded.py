@@ -4,10 +4,12 @@ from web3.auto import w3
 from web3.middleware import geth_poa_middleware
 from web3.gas_strategies.time_based import fast_gas_price_strategy, slow_gas_price_strategy,medium_gas_price_strategy
 from web3.gas_strategies.rpc import rpc_gas_price_strategy
+from cachetools import TTLCache, cachedmethod
+from operator import attrgetter
 import os
-
-#print(rpc_gas_price_strategy(we3))
-
+from functools import partial
+from cachetools import cached, LRUCache
+from cachetools.keys import hashkey
 
 #import timeit
 #start = timeit.default_timer()
@@ -15,32 +17,42 @@ import os
 w3.eth.enable_unaudited_features()
 token = os.environ['INFURA_TOKEN']
 url = "https://ropsten.infura.io/%s" % token
-we3 = Web3(Web3.HTTPProvider(url))
+w3 = Web3(Web3.HTTPProvider(url))
+#w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8545"))
 
-#we3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8545"))
-we3.eth.enable_unaudited_features()
+w3.eth.setGasPriceStrategy(fast_gas_price_strategy)
+cache = TTLCache(maxsize=10000, ttl=600)
 
-#we3.middleware_stack.inject(geth_poa_middleware, layer=0)
-we3.middleware_stack.add(middleware.time_based_cache_middleware)
-#we3.middleware_stack.add(middleware.latest_block_based_cache_middleware)
-#we3.middleware_stack.add(middleware.simple_cache_middleware)
+
+@cached(cache, key=partial(hashkey, 'gas'))
+def gas_price():
+        print('recived')
+        gasPrice =  w3.eth.generateGasPrice()
+        return gasPrice
+
+for i in range(0,50):
+         print(gas_price())
+         print(cache)
+print(gas_price())
+print(cache)
+
 
 
 def calcEthNeeded(gasNeeded, speed):
    if speed == 'fast':
-       we3.eth.setGasPriceStrategy(fast_gas_price_strategy)
-       gasPrice = we3.eth.generateGasPrice()
+       w3.eth.setGasPriceStrategy(rpc_gas_price_strategy)
+       gasPrice = w3.eth.generateGasPrice()
+       we3.middleware_stack.inject(geth_poa_middleware, layer=0)
        return (gasPrice * gasNeeded) /  (10 ** 9)
    if speed =='medium':
-       we3.eth.setGasPriceStrategy(medium_gas_price_strategy)
-       gasPrice = we3.eth.generateGasPrice()
+       w3.eth.setGasPriceStrategy(medium_gas_price_strategy)
+       gasPrice = w3.eth.generateGasPrice()
        return (gasPrice * gasNeeded) /  (10 ** 9)
    if speed == 'slow':
-       we3.eth.setGasPriceStrategy(slow_gas_price_strategy)
-       gasPrice = we3.eth.generateGasPrice()
+       w3.eth.setGasPriceStrategy(slow_gas_price_strategy)
+       gasPrice = w3.eth.generateGasPrice()
        return (gasPrice * gasNeeded) /  (10 ** 9)
 
-#print(calcEthNeeded(10000,'medium'))
+#print(calcEthNeeded(10000,'fast'))
 #stop = timeit.default_timer()
 #print('Time: ', stop - start)
-
