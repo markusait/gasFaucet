@@ -1,3 +1,4 @@
+import os
 from web3 import Web3, HTTPProvider, middleware
 from web3.contract import ConciseContract
 from web3.auto import w3
@@ -5,8 +6,6 @@ from web3.middleware import geth_poa_middleware
 from web3.gas_strategies.time_based import fast_gas_price_strategy, slow_gas_price_strategy,medium_gas_price_strategy
 from web3.gas_strategies.rpc import rpc_gas_price_strategy
 from cachetools import TTLCache, cachedmethod
-from operator import attrgetter
-import os
 from functools import partial
 from cachetools import cached, LRUCache
 from cachetools.keys import hashkey
@@ -23,14 +22,6 @@ w3 = Web3(Web3.HTTPProvider(url))
 w3.eth.setGasPriceStrategy(fast_gas_price_strategy)
 #setting ttl to < 0.000001 will show the effect
 cache = TTLCache(maxsize=10000, ttl=600)
-
-
-@cached(cache, key=partial(hashkey, 'gas'))
-def gas_price():
-        print('recived')
-        gasPrice =  w3.eth.generateGasPrice()
-        return gasPrice
-
 
 
 @cached(cache, key=partial(hashkey, 'gas'))
