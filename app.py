@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request, abort
 from calcEthNeeded import calcEthNeeded
+from web3Wallet import sendTransaction
 app = Flask(__name__)
 
 
@@ -15,22 +16,26 @@ def returnQuery():
     try:
         #handeling invalid request parameter
         if not request.args.get('gas_needed'):
-            raise InvalidUsage('gas_needed property incorrect', status_code=500)
+            raise InvalidUsage('gas_needed property incorrect', status_code=400)
         if not request.args.get('public_address'):
-            raise InvalidUsage('public_address  property incorrect', status_code=500)
+            raise InvalidUsage('public_address  property incorrect', status_code=400)
         if not request.args.get('tx_speed'):
-            raise InvalidUsage('tx_speed property incorrect', status_code=500)
+            raise InvalidUsage('tx_speed property incorrect', status_code=400)
 
         gasNeeded = int(request.args.get('gas_needed'))
         address = request.args.get('public_address')
         speedNeeded = request.args.get('tx_speed')
 
         calculation = calcEthNeeded(gasNeeded, speedNeeded)
-        #txHash = sendTransaction(ethNeeded)
-        return jsonify({"gas requested": gasNeeded}, {"public address": address}, {"speed requested": speedNeeded}, {"Eth sent in Wei": calculation[0]["Eth sent in Wei"]}, {"gasPrice in GWei": calculation[1]["gasPrice in GWei"] }, {"result:": 'txHash'})
+        print('calced eth needed', calculation)
+        txHash = sendTransaction(1000)
+        print('calced tx hash')
+        return jsonify({"gas requested": gasNeeded}, {"public address": address}, {"speed requested": speedNeeded}, {"Eth sent in Wei": calculation[0]["Eth sent in Wei"]}, {"gasPrice in GWei": calculation[1]["gasPrice in GWei"] }, {"result:": txHash})
     #handleing exceptions
     except Exception:
         raise InvalidUsage('Invalid input', status_code=400)
+
+
 
 #handeling invalid routes
 @app.errorhandler(404)
@@ -42,6 +47,7 @@ def not_found(error):
 def internal_server_error(error):
     return jsonify({"error": "internal server error"})
 
+#custom Error Code
 class InvalidUsage(Exception):
     status_code = 400
 

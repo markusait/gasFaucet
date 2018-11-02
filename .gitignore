@@ -5,3 +5,4 @@ secondtest.py
 testing.py
 gasFaucet_uwsgi.sock
 gasFaucet_uwsgi.ini
+startGasFaucet.sh        

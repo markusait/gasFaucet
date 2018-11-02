@@ -32,8 +32,8 @@ print(w3)
 def testBool(method,params,response):
         return True
 
+# default sample size of gas price strategies is 120
 block_hash_cache_middleware = construct_simple_cache_middleware(
-       # default sample size of gas price strategies is 120
        cache_class=functools.partial(LRUCache, 150),
        rpc_whitelist='eth_getBlockByHash',
        should_cache_fn=testBool
@@ -43,7 +43,13 @@ w3.middleware_stack.add(block_hash_cache_middleware)
 
 
 
-
+def keepCacheWarm(seconds):
+    def func_wrapper():
+        keepCacheWarm(seconds)
+        w3.eth.generateGasPrice()
+    t = threading.Timer(sec, func_wrapper)
+    t.start()
+    return t
 
 
 
@@ -83,9 +89,9 @@ def calcEthNeeded(gasNeeded, speed):
 
 #print('reeching')
 #initializing
-print(calcEthNeeded(1000,'medium'))
+#print(calcEthNeeded(1000,'medium'))
 #set_interval(calcEthNeeded,20)
-
+keepCacheWarm(60)
 
 
 
