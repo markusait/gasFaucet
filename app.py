@@ -1,6 +1,5 @@
 from flask import Flask, jsonify, request, abort
-from calcEthNeeded import calcEthNeeded
-from web3Wallet import sendTransaction
+from sendWeb3Transaction import sendTransaction
 app = Flask(__name__)
 
 
@@ -24,13 +23,11 @@ def returnQuery():
 
         gasNeeded = int(request.args.get('gas_needed'))
         address = request.args.get('public_address')
-        speedNeeded = request.args.get('tx_speed')
-
-        calculation = calcEthNeeded(gasNeeded, speedNeeded)
-        print('calced eth needed', calculation)
-        txHash = sendTransaction(1000)
-        print('calced tx hash')
-        return jsonify({"gas requested": gasNeeded}, {"public address": address}, {"speed requested": speedNeeded}, {"Eth sent in Wei": calculation[0]["Eth sent in Wei"]}, {"gasPrice in GWei": calculation[1]["gasPrice in GWei"] }, {"result:": txHash})
+        speed = request.args.get('tx_speed')
+        response =  sendTransaction(gasNeeded, speed, address)
+        print(response)
+        txHash, gasPrice, ethNeeded = [response[i] for i in ("txHash", "gasPrice","ethNeeded")]
+        return jsonify({"message": "successful"},{"Eth sent in Wei":ethNeeded},{"Gas price in Gwei":gasPrice},{"tx_hash":txHash})
     #handleing exceptions
     except Exception:
         raise InvalidUsage('Invalid input', status_code=400)

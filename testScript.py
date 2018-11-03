@@ -15,7 +15,7 @@ payload = {'gas_needed': '10000', 'tx_speed': 'medium', 'public_address': '0x516
 
 def blockreq():
     start = timeit.default_timer()
-    r = requests.get('http://api.digitpay.de/fill-wallet-for-gas', params=payload)
+    r = requests.get('http://localhost:8000/fill-wallet-for-gas', params=payload)
     print(r.json())
     stop = timeit.default_timer()
     print('Time: ', stop - start)
@@ -39,6 +39,6 @@ def set_interval(func, sec):
     t.start()
     return t
 
-set_interval(blockreq,10)
+set_interval(blockreq,60)
 
 
