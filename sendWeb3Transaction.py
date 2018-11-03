@@ -54,8 +54,8 @@ def sendTransaction(gasNeeded, speed, receiver):
     gasPrice=calcGasPrice(speed)
     ethNeeded = gasPrice * gasNeeded
     #TODO: increment manually after each call for quicker transactions
-    nonce=w3.eth.getTransactionCount(acct.address, 'latest')
-    print(receiver)
+    nonce=w3.eth.getTransactionCount(acct.address, 'pending')
+
     transaction = {
         'to': receiver,
         'value': ethNeeded,
@@ -67,9 +67,12 @@ def sendTransaction(gasNeeded, speed, receiver):
         }
 
     signed = Account.signTransaction(transaction, acct.privateKey)
-    txHash = w3.eth.sendRawTransaction(signed.rawTransaction)
-    print(txHash)
-    return {"txHash":txHash.hex(),"gasPrice": gasPrice /10**9,"ethNeeded":ethNeeded}
+    try:
+        txHash = w3.eth.sendRawTransaction(signed.rawTransaction)
+        return {"message": "successful",  "txHash":txHash.hex(),"gasPrice in Gwei": gasPrice /10**9,"Eth sent in Wei":ethNeeded, "link": "https://ropsten.etherscan.io/tx/" + txHash.hex()}
+    except:
+        return {"message":"I am notready yet"}
+        #sendTransaction(gasNeeded, speed, receiver)
 
 #print(sendTransaction(10000,'fast','0xF0109fC8DF283027b6285cc889F5aA624EaC1F55'))
 

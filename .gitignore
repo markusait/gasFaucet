@@ -9,3 +9,5 @@ startGasFaucet.sh
 uwsgi.ini
 gasFaucet_uwsgi.ini
 gasFaucet_uwsgi.sock
+config.py
+testwallet.py
