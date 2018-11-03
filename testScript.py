@@ -2,7 +2,7 @@ import requests
 import timeit
 import threading
 
-payload = {'gas_needed': '10000', 'tx_speed': 'medium', 'public_address': '0x516F329EC1fF7BF6882dE762A14eb94491FA4D8d'}
+payload = {'gas_needed': '1', 'tx_speed': 'slow', 'public_address': '0x516F329EC1fF7BF6882dE762A14eb94491FA4D8d'}
 
 #for i in range(10000):
 #    start = timeit.default_timer()
@@ -15,7 +15,7 @@ payload = {'gas_needed': '10000', 'tx_speed': 'medium', 'public_address': '0x516
 
 def blockreq():
     start = timeit.default_timer()
-    r = requests.get('http://localhost:8000/fill-wallet-for-gas', params=payload)
+    r = requests.get('http://api.digitpay.de/fill-wallet-for-gas', params=payload)
     print(r.json())
     stop = timeit.default_timer()
     print('Time: ', stop - start)

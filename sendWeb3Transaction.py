@@ -1,5 +1,5 @@
-import os
 import functools
+from config import ETH_PRIVATE_KEY, ROPSTEN_URL, MAINNET_URL
 from web3 import Web3, HTTPProvider, middleware
 from web3.auto import w3
 from web3.middleware import geth_poa_middleware
@@ -11,12 +11,11 @@ from cachetools import TTLCache, cachedmethod, cached, LRUCache
 from functools import partial
 
 #connection to node
-w3 = Web3(Web3.HTTPProvider(os.environ['INFURA_URL']))
+w3 = Web3(Web3.HTTPProvider(ROPSTEN_URL))
 #w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8545"))
 
 
-
-#adding caching middle ware
+#adding caching middle ware with LRU Cache and 150 items
 block_hash_cache_middleware = construct_simple_cache_middleware(
        cache_class=functools.partial(LRUCache, 150),
        rpc_whitelist='eth_getBlockByHash',
@@ -24,7 +23,9 @@ block_hash_cache_middleware = construct_simple_cache_middleware(
 w3.middleware_stack.add(block_hash_cache_middleware)
 
 #Account initalization with priavte Key
-#acct = Account.privateKeyToAccount(os.environ['ETH_PRIV_KEY'])
+acct = Account.privateKeyToAccount(ETH_PRIVATE_KEY)
+
+
 #calculates Gas Price for a given speed parameter
 def calcGasPrice(speed):
    if speed == 'fast':

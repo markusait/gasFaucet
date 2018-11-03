@@ -7,31 +7,30 @@ app = Flask(__name__)
 def index():
     return jsonify({"message": "It works!"},{"available speed parameters":"fast, medium, slow"},{"example request": "http://api.digitpay.de/fill-wallet-for-gas?gas_needed=10000&tx_speed=medium&public_address=0x516F329EC1fF7BF6882dE762A14eb94491FA4D8d"})
 
-#handeling parameters
+# handeling parameters
 @app.route('/fill-wallet-for-gas', methods=['GET'])
 def returnQuery():
     # print(request.query_string)
-    #args = request.args.to_dict()
+    # args = request.args.to_dict()
+    # handeling invalid request parameter
+    if not request.args.get('gas_needed'):
+        raise InvalidUsage('gas_needed property incorrect', status_code=400)
+    if not request.args.get('public_address'):
+        raise InvalidUsage(
+            'public_address  property incorrect', status_code=400)
+    if not request.args.get('tx_speed'):
+        raise InvalidUsage('tx_speed property incorrect', status_code=400)
     try:
-        #handeling invalid request parameter
-        if not request.args.get('gas_needed'):
-            raise InvalidUsage('gas_needed property incorrect', status_code=400)
-        if not request.args.get('public_address'):
-            raise InvalidUsage('public_address  property incorrect', status_code=400)
-        if not request.args.get('tx_speed'):
-            raise InvalidUsage('tx_speed property incorrect', status_code=400)
-
         gasNeeded = int(request.args.get('gas_needed'))
         address = request.args.get('public_address')
         speed = request.args.get('tx_speed')
-        response =  sendTransaction(gasNeeded, speed, address)
+        response = sendTransaction(gasNeeded, speed, address)
         print(response)
-        txHash, gasPrice, ethNeeded = [response[i] for i in ("txHash", "gasPrice","ethNeeded")]
-        return jsonify({"message": "successful"},{"Eth sent in Wei":ethNeeded},{"Gas price in Gwei":gasPrice},{"tx_hash":txHash})
-    #handleing exceptions
+        txHash, gasPrice, ethNeeded = [response[i] for i in ("txHash", "gasPrice", "ethNeeded")]
+        return jsonify({"message": "successful"}, {"Eth sent in Wei": ethNeeded}, {"Gas price in Gwei": gasPrice}, {"tx_hash": txHash}, {"link": "https://ropsten.etherscan.io/tx/" + txHash})
+        # handleing exceptions
     except Exception:
         raise InvalidUsage('Invalid input', status_code=400)
-
 
 
 #handeling invalid routes
