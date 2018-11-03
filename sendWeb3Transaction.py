@@ -8,7 +8,7 @@ from web3.middleware.cache import construct_simple_cache_middleware
 from eth_account import Account
 from cachetools import LRUCache
 from functools import partial
-
+from threading import Timer
 #connection to node
 w3 = Web3(Web3.HTTPProvider(ROPSTEN_URL))
 #w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8545"))
@@ -45,8 +45,6 @@ def calcGasPrice(speed):
 
 
 
-
-
 #takes in the requested eth in wei and returns txHash
 def sendTransaction(gasNeeded, speed, receiver):
     #calculating the gasPrice
@@ -58,7 +56,7 @@ def sendTransaction(gasNeeded, speed, receiver):
     transaction = {
         'to': receiver,
         'value': ethNeeded,
-        'gas': 2000000,
+        'gas': 314150,
         'gasPrice': calcGasPrice('fast'),
         'nonce': nonce,
         'data': '53656e742066726f6d20676173466175636574202a2e2a',
@@ -66,13 +64,18 @@ def sendTransaction(gasNeeded, speed, receiver):
         }
 
     signed = Account.signTransaction(transaction, acct.privateKey)
+    gweiGasPrice = "%.2f" % (gasPrice / 10 ** 9)
     try:
-        txHash = w3.eth.sendRawTransaction(signed.rawTransaction)
-        return {"message": "successful",  "txHash":txHash.hex(),"gasPrice in Gwei": gasPrice /10**9,"Eth sent in Wei":ethNeeded, "link": "https://ropsten.etherscan.io/tx/" + txHash.hex()}
+        txHash = (w3.eth.sendRawTransaction(signed.rawTransaction)).hex()
+        return {"message": "successful",  "txHash":txHash,"gasPrice in Gwei": gweiGasPrice,"Eth sent in Wei":ethNeeded, "link": "https://ropsten.etherscan.io/tx/" + txHash}
     except:
         return {"message":"I am notready yet"}
         #sendTransaction(gasNeeded, speed, receiver)
 
+#making sure the gas Price can be calculated quickly at any time
+def keepCacheWarm():
+    Timer(60, keepCacheWarm).start()
+    calcGasPrice('fast')
+
+keepCacheWarm()
 #print(sendTransaction(10000,'fast','0xF0109fC8DF283027b6285cc889F5aA624EaC1F55'))
-
-

@@ -1,6 +1,4 @@
-flask
-web3
-functools
-eth_account
-cachetools
-functools
+flask==1.0.2
+web3==4.8.1
+eth_account==0.3.0
+cachetools==2.1.0

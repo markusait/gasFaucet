@@ -25,8 +25,6 @@ def returnQuery():
         address = request.args.get('public_address')
         speed = request.args.get('tx_speed')
         response = sendTransaction(gasNeeded, speed, address)
-        #message, txHash, gasPrice, ethNeeded = [response[i] for i in ("message", "txHash", "gasPrice", "ethNeeded")]
-        #return jsonify({"message": message}, {"Eth sent in Wei": ethNeeded}, {"Gas price in Gwei": gasPrice}, {"tx_hash": txHash}, {"link": "https://ropsten.etherscan.io/tx/" + txHash})
         return jsonify(response)
         # handleing exceptions
     except Exception:
