@@ -1,4 +1,3 @@
-import functools
 from config import ETH_PRIVATE_KEY, ROPSTEN_URL, MAINNET_URL
 from web3 import Web3, HTTPProvider, middleware
 from web3.auto import w3
@@ -7,7 +6,7 @@ from web3.gas_strategies.time_based import fast_gas_price_strategy, slow_gas_pri
 from web3.gas_strategies.rpc import rpc_gas_price_strategy
 from web3.middleware.cache import construct_simple_cache_middleware
 from eth_account import Account
-from cachetools import TTLCache, cachedmethod, cached, LRUCache
+from cachetools import LRUCache
 from functools import partial
 
 #connection to node
@@ -17,7 +16,7 @@ w3 = Web3(Web3.HTTPProvider(ROPSTEN_URL))
 
 #adding caching middle ware with LRU Cache and 150 items
 block_hash_cache_middleware = construct_simple_cache_middleware(
-       cache_class=functools.partial(LRUCache, 150),
+       cache_class=partial(LRUCache, 150),
        rpc_whitelist='eth_getBlockByHash',
 )
 w3.middleware_stack.add(block_hash_cache_middleware)

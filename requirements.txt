@@ -1,2 +1,6 @@
 flask
 web3
+functools
+eth_account
+cachetools
+functools
