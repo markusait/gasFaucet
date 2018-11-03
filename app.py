@@ -1,11 +1,19 @@
-from flask import Flask, jsonify, request, abort
+from flask import Flask, jsonify, request, abort, render_template
 from sendWeb3Transaction import sendTransaction
 app = Flask(__name__)
 
 
 @app.route('/', methods=['GET'])
 def index():
-    return jsonify({"message": "It works!"},{"available speed parameters":"fast, medium, slow"},{"example request": "http://api.digitpay.de/fill-wallet-for-gas?gas_needed=10000&tx_speed=medium&public_address=0x516F329EC1fF7BF6882dE762A14eb94491FA4D8d"})
+    return render_template('home.html')
+
+@app.route('/', methods=['POST'])
+def my_form_post():
+    text = request.form['text']
+    processed_text = text.upper()
+    return processed_text
+
+
 
 # handeling parameters
 @app.route('/fill-wallet-for-gas', methods=['GET'])

@@ -74,7 +74,7 @@ def sendTransaction(gasNeeded, speed, receiver):
 
 #making sure the gas Price can be calculated quickly at any time
 def keepCacheWarm():
-    Timer(60, keepCacheWarm).start()
+    Timer(30, keepCacheWarm).start()
     calcGasPrice('fast')
 
 keepCacheWarm()
