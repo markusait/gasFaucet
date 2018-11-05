@@ -1,6 +1,7 @@
 TODO.md
 venv/
 __pycache__/
+tests/
 twallet.py
 testing.py
 gasFaucet_uwsgi.sock

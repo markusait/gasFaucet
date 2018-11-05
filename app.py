@@ -1,28 +1,19 @@
 from flask import Flask, jsonify, request, abort, render_template
-from sendWeb3Transaction import sendTransaction
+from sendWeb3Transaction import sendTransaction, keepCacheWarm
 from wtforms import Form, TextField, TextAreaField, validators, StringField, SubmitField
+from threading import Timer
+
 app = Flask(__name__)
-
-
-class ReusableForm(Form):
-	name = TextField('Name:', validators=[validators.required()])
+cacheInterval = 10
 
 
 
+Timer(cacheInterval, keepCacheWarm).start()
 
-@app.route('/', methods=['GET', 'POST'])
-def home():
-    form = ReusableForm(request.form)
 
-    if request.method == 'POST':
-        name=request.form['name']
-        print(name)
-        if form.validate():
-            # Save the comment here.
-            flash('Hello ' + name)
-        else:
-            flash('Error: All the form fields are required. ')
-    return render_template('home.html', form=form)
+@app.route('/', methods=['GET'])
+def index():
+        return jsonify({'message': 'It works!'},{"example request": "http://api.digitpay.de/fill-wallet-for-gas?gas_needed=10000&tx_speed=medium&public_address=0x516F329EC1fF7BF6882dE762A14eb94491FA4D8d"})
 
 
 
@@ -44,7 +35,6 @@ def returnQuery():
         address = request.args.get('public_address')
         speed = request.args.get('tx_speed')
         response = sendTransaction(gasNeeded, speed, address)
-        print('came all the way here')
         return jsonify(response)
     # handleing exceptions
     except Exception:

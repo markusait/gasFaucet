@@ -30,7 +30,7 @@ acct = Account.privateKeyToAccount(ETH_PRIVATE_KEY)
 
 #Cache with 3 categories fast, medium ,slow
 priceCache = Cache(maxsize=3)
-
+#priceCache = {}
 #making sure the gas Price can be calculated quickly at any time
 def keepCacheWarm():
     start = timeit.default_timer()
@@ -49,7 +49,8 @@ def keepCacheWarm():
     print(priceCache.__getitem__('fast'))
     Timer(cacheInterval, keepCacheWarm).start()
 
-keepCacheWarm()
+#Timer(cacheInterval, keepCacheWarm).start()
+#keepCacheWarm()
 
 
 #takes in the requested eth in wei and returns txHash
@@ -60,7 +61,7 @@ def sendTransaction(gasNeeded, speed, receiver):
     ethNeeded = gasPrice * gasNeeded
     #TODO: increment manually after each call for quicker transactions
     nonce=w3.eth.getTransactionCount(acct.address, 'pending')
-    txGasPrice = priceCache.__getitem__('fast')
+    txGasPrice = 20000000000
     transaction = {
         'to': receiver,
         'value': ethNeeded,
@@ -74,7 +75,7 @@ def sendTransaction(gasNeeded, speed, receiver):
         signed = Account.signTransaction(transaction, acct.privateKey)
         gweiGasPrice = "%.2f" % (gasPrice / 10 ** 9)
         txHash = w3.eth.sendRawTransaction(signed.rawTransaction)
-        return {"message": "successful",  "txHash":txHash.hex(),"gasPrice in Gwei": gweiGasPrice,"Eth sent in Wei":ethNeeded, "link": "https://ropsten.etherscan.io/tx/" + txHash.hex()}
+        return {"message": "successful",  "txHash":txHash.hex(),"gasPrice in Gwei": gasPrice,"Eth sent in Wei":ethNeeded, "link": "https://ropsten.etherscan.io/tx/" + txHash.hex()}
     except:
-        return {"message":"I am notready yet"}
+        return {"message":"I am not ready yet"}
 
