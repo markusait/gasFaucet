@@ -4,18 +4,25 @@ from wtforms import Form, TextField, TextAreaField, validators, StringField, Sub
 app = Flask(__name__)
 
 
+class ReusableForm(Form):
+	name = TextField('Name:', validators=[validators.required()])
+
+
+
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
-    return render_template('home.html')
+    form = ReusableForm(request.form)
+    if request.method == 'POST':
+        name=request.form['name']
+        print(name)
+        if form.validate():
+            # Save the comment here.
+            flash('Hello ' + name)
+        else:
+            flash('Error: All the form fields are required. ')
 
-@app.route('/', methods=['POST'])
-def my_form_post():
-    text = request.form['text']
-    processed_text = text.upper()
-    return processed_text
-
-
+    return render_template('home.html', form=form)
 
 # handeling parameters
 @app.route('/fill-wallet-for-gas', methods=['GET'])
