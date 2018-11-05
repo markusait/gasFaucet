@@ -1,10 +1,12 @@
 from flask import Flask, jsonify, request, abort, render_template
 from sendWeb3Transaction import sendTransaction
+from wtforms import Form, TextField, TextAreaField, validators, StringField, SubmitField
 app = Flask(__name__)
 
 
-@app.route('/', methods=['GET'])
-def index():
+
+@app.route('/', methods=['GET', 'POST'])
+def home():
     return render_template('home.html')
 
 @app.route('/', methods=['POST'])
@@ -33,9 +35,11 @@ def returnQuery():
         address = request.args.get('public_address')
         speed = request.args.get('tx_speed')
         response = sendTransaction(gasNeeded, speed, address)
+        print('came all the way here')
         return jsonify(response)
-        # handleing exceptions
+    # handleing exceptions
     except Exception:
+        #return jsonify(sendTransaction(gasNeeded, speed, address))
         raise InvalidUsage('Invalid input sent', status_code=400)
 
 

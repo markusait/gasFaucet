@@ -6,11 +6,15 @@ from web3.gas_strategies.time_based import fast_gas_price_strategy, slow_gas_pri
 from web3.gas_strategies.rpc import rpc_gas_price_strategy
 from web3.middleware.cache import construct_simple_cache_middleware
 from eth_account import Account
-from cachetools import LRUCache
+from cachetools import LRUCache, Cache
 from functools import partial
 from threading import Timer
+import timeit
+
+cacheInterval = 5
+
 #connection to node
-w3 = Web3(Web3.HTTPProvider(ROPSTEN_URL))
+w3 = Web3(Web3.HTTPProvider(MAINNET_URL))
 #w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8545"))
 
 
@@ -25,30 +29,35 @@ w3.middleware_stack.add(block_hash_cache_middleware)
 acct = Account.privateKeyToAccount(ETH_PRIVATE_KEY)
 
 
-#calculates Gas Price for a given speed parameter
-def calcGasPrice(speed):
-   if speed == 'fast':
-       w3.eth.setGasPriceStrategy(fast_gas_price_strategy)
-       gasPrice = w3.eth.generateGasPrice()
-       print(gasPrice)
-       return gasPrice
-   if speed =='medium':
-       w3.eth.setGasPriceStrategy(medium_gas_price_strategy)
-       gasPrice = w3.eth.generateGasPrice()
-       print(gasPrice)
-       return gasPrice
-   if speed == 'slow':
-       w3.eth.setGasPriceStrategy(slow_gas_price_strategy)
-       gasPrice = w3.eth.generateGasPrice()
-       print(gasPrice)
-       return gasPrice
+#Cache with 3 categories fast, medium ,slow
+priceCache = Cache(maxsize=3)
 
+#making sure the gas Price can be calculated quickly at any time
+def keepCacheWarm():
+    start = timeit.default_timer()
+
+    w3.eth.setGasPriceStrategy(fast_gas_price_strategy)
+    priceCache.__setitem__('fast',w3.eth.generateGasPrice())
+
+    w3.eth.setGasPriceStrategy(medium_gas_price_strategy)
+    priceCache.__setitem__('medium',w3.eth.generateGasPrice())
+
+    w3.eth.setGasPriceStrategy(slow_gas_price_strategy)
+    priceCache.__setitem__('slow',w3.eth.generateGasPrice())
+
+    stop = timeit.default_timer()
+    print('Time: ', stop - start)
+    print(priceCache.__getitem__('fast'))
+    Timer(cacheInterval, keepCacheWarm).start()
+
+keepCacheWarm()
 
 
 #takes in the requested eth in wei and returns txHash
 def sendTransaction(gasNeeded, speed, receiver):
     #calculating the gasPrice
-    gasPrice=calcGasPrice(speed)
+    #gasPrice=calcGasPrice(speed)
+    gasPrice = priceCache.__getitem__(speed)
     ethNeeded = gasPrice * gasNeeded
     #TODO: increment manually after each call for quicker transactions
     nonce=w3.eth.getTransactionCount(acct.address, 'pending')
@@ -57,25 +66,16 @@ def sendTransaction(gasNeeded, speed, receiver):
         'to': receiver,
         'value': ethNeeded,
         'gas': 314150,
-        'gasPrice': calcGasPrice('fast'),
+        'gasPrice': priceCache.__getitem__('fast'),
         'nonce': nonce,
         'data': '53656e742066726f6d20676173466175636574202a2e2a',
         'chainId': 3, # Ropsten chain ID
         }
-
-    signed = Account.signTransaction(transaction, acct.privateKey)
-    gweiGasPrice = "%.2f" % (gasPrice / 10 ** 9)
     try:
-        txHash = (w3.eth.sendRawTransaction(signed.rawTransaction)).hex()
-        return {"message": "successful",  "txHash":txHash,"gasPrice in Gwei": gweiGasPrice,"Eth sent in Wei":ethNeeded, "link": "https://ropsten.etherscan.io/tx/" + txHash}
+        signed = Account.signTransaction(transaction, acct.privateKey)
+        gweiGasPrice = "%.2f" % (gasPrice / 10 ** 9)
+        txHash = w3.eth.sendRawTransaction(signed.rawTransaction)
+        return {"message": "successful",  "txHash":txHash.hex(),"gasPrice in Gwei": gweiGasPrice,"Eth sent in Wei":ethNeeded, "link": "https://ropsten.etherscan.io/tx/" + txHash.hex()}
     except:
         return {"message":"I am notready yet"}
-        #sendTransaction(gasNeeded, speed, receiver)
 
-#making sure the gas Price can be calculated quickly at any time
-def keepCacheWarm():
-    Timer(30, keepCacheWarm).start()
-    calcGasPrice('fast')
-
-keepCacheWarm()
-#print(sendTransaction(10000,'fast','0xF0109fC8DF283027b6285cc889F5aA624EaC1F55'))
