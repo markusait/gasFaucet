@@ -4,16 +4,41 @@ from wtforms import Form, TextField, TextAreaField, validators, StringField, Sub
 from threading import Timer
 
 app = Flask(__name__)
+
+#keeping the cache warm so gas prices can be retrived fast
 cacheInterval = 10
-
-
-
 Timer(cacheInterval, keepCacheWarm).start()
 
 
-@app.route('/', methods=['GET'])
-def index():
-        return jsonify({'message': 'It works!'},{"example request": "http://api.digitpay.de/fill-wallet-for-gas?gas_needed=10000&tx_speed=medium&public_address=0x516F329EC1fF7BF6882dE762A14eb94491FA4D8d"})
+app.config['SECRET_KEY'] = '7d441f27d441f27567d441f2b6176a'
+
+
+class ReusableForm(Form):
+     # speed = SelectField('Speed:',choices = [('fast'), ('medium'),('slow')])
+     speed = TextField('Speed:', validators=[validators.required(), validators.Length(min=3, max=7)])
+     gasNeeded = TextField('GasNeeded:', validators=[validators.required(), validators.Length(min=0, max=30)])
+     ethaddress = TextField('Ethaddress:', validators=[validators.required(), validators.Length(min=39, max=43)])
+
+
+@app.route('/', methods=['GET', 'POST'])
+def home():
+    form = ReusableForm(request.form)
+    print(form.errors)
+    if request.method == 'POST':
+         speed = request.form['speed']
+         print(speed)
+         ethaddress = request.form['ethaddress']
+         gasNeeded = request.form['gasNeeded']
+         print(speed,gasNeeded,ethaddress)
+    if form.validate():
+         # Save the comment here.
+         flash('Hello ' + speed)
+    else:
+         flash('Error: All the form fields are required. ')
+    return render_template('home.html', form=form)
+
+
+
 
 
 
