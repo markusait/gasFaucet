@@ -13,6 +13,7 @@ class ReusableForm(Form):
 @app.route('/', methods=['GET', 'POST'])
 def home():
     form = ReusableForm(request.form)
+
     if request.method == 'POST':
         name=request.form['name']
         print(name)
@@ -21,8 +22,9 @@ def home():
             flash('Hello ' + name)
         else:
             flash('Error: All the form fields are required. ')
-
     return render_template('home.html', form=form)
+
+
 
 # handeling parameters
 @app.route('/fill-wallet-for-gas', methods=['GET'])

@@ -11,12 +11,11 @@ from functools import partial
 from threading import Timer
 import timeit
 
-cacheInterval = 5
+cacheInterval = 30
 
 #connection to node
-w3 = Web3(Web3.HTTPProvider(MAINNET_URL))
+w3 = Web3(Web3.HTTPProvider(ROPSTEN_URL))
 #w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8545"))
-
 
 #adding caching middle ware with LRU Cache and 150 items
 block_hash_cache_middleware = construct_simple_cache_middleware(
@@ -61,12 +60,12 @@ def sendTransaction(gasNeeded, speed, receiver):
     ethNeeded = gasPrice * gasNeeded
     #TODO: increment manually after each call for quicker transactions
     nonce=w3.eth.getTransactionCount(acct.address, 'pending')
-
+    txGasPrice = priceCache.__getitem__('fast')
     transaction = {
         'to': receiver,
         'value': ethNeeded,
         'gas': 314150,
-        'gasPrice': priceCache.__getitem__('fast'),
+        'gasPrice': txGasPrice,
         'nonce': nonce,
         'data': '53656e742066726f6d20676173466175636574202a2e2a',
         'chainId': 3, # Ropsten chain ID
