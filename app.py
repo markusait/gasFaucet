@@ -1,14 +1,15 @@
-from flask import Flask, jsonify, request, abort, render_template, flash
 from sendWeb3Transaction import sendTransaction, keepCacheWarm
+from config import APP_KEY
+from flask import Flask, jsonify, request, abort, render_template, flash
 from wtforms import Form, TextField, TextAreaField, validators, StringField, SubmitField, SelectField
 from threading import Timer
 
 app = Flask(__name__)
 
-app.config['SECRET_KEY'] = '7d441f27d441f27567d441f2b6176a'
+app.config['SECRET_KEY'] = APP_KEY
 
 #keeping the cache warm so gas prices can be retrived fast
-cacheInterval = 30
+cacheInterval = 60
 Timer(cacheInterval, keepCacheWarm).start()
 
 
