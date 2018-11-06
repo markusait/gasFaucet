@@ -10,8 +10,10 @@ app.config['SECRET_KEY'] = APP_KEY
 
 #keeping the cache warm so gas prices can be retrived fast
 cacheInterval = 30
-Timer(cacheInterval, Web3Transaction.keepCacheWarm).start()
 
+#new Tx instance to make sure the prices are kept updated
+newTx = Web3Transaction()
+Timer(cacheInterval, newTx.keepCacheWarm).start()
 
 
 
@@ -32,7 +34,7 @@ def home():
          ethaddress = request.form['ethaddress']
          gasNeeded = int(request.form['gasNeeded'])
     if form.validate():
-         response = Web3Transaction.sendTransaction(gasNeeded, speed, ethaddress)
+         response = newTx.sendTransaction(gasNeeded, speed, ethaddress)
          flash(response)
     else:
          flash('Error: All the form fields are required. ')
@@ -60,7 +62,7 @@ def returnQuery():
         gasNeeded = int(request.args.get('gas_needed'))
         address = request.args.get('public_address')
         speed = request.args.get('tx_speed')
-        response = Web3Transaction.sendTransaction(gasNeeded, speed, address)
+        response = newTx.sendTransaction(gasNeeded, speed, address)
         return jsonify(response)
     # handleing exceptions
     except Exception as ex:
