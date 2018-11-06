@@ -1,18 +1,19 @@
-from flask import Flask, jsonify, request, abort, render_template
+from flask import Flask, jsonify, request, abort, render_template, flash
 from sendWeb3Transaction import sendTransaction, keepCacheWarm
-from wtforms import Form, TextField, TextAreaField, validators, StringField, SubmitField
+from wtforms import Form, TextField, TextAreaField, validators, StringField, SubmitField, SelectField
 from threading import Timer
 
 app = Flask(__name__)
+
+app.config['SECRET_KEY'] = '7d441f27d441f27567d441f2b6176a'
 
 #keeping the cache warm so gas prices can be retrived fast
 cacheInterval = 10
 Timer(cacheInterval, keepCacheWarm).start()
 
 
-app.config['SECRET_KEY'] = '7d441f27d441f27567d441f2b6176a'
 
-
+#form for the frontend
 class ReusableForm(Form):
      # speed = SelectField('Speed:',choices = [('fast'), ('medium'),('slow')])
      speed = TextField('Speed:', validators=[validators.required(), validators.Length(min=3, max=7)])
@@ -26,13 +27,11 @@ def home():
     print(form.errors)
     if request.method == 'POST':
          speed = request.form['speed']
-         print(speed)
          ethaddress = request.form['ethaddress']
-         gasNeeded = request.form['gasNeeded']
-         print(speed,gasNeeded,ethaddress)
+         gasNeeded = int(request.form['gasNeeded'])
     if form.validate():
-         # Save the comment here.
-         flash('Hello ' + speed)
+         response = sendTransaction(gasNeeded, speed, ethaddress)
+         flash(response)
     else:
          flash('Error: All the form fields are required. ')
     return render_template('home.html', form=form)
