@@ -8,7 +8,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = '7d441f27d441f27567d441f2b6176a'
 
 #keeping the cache warm so gas prices can be retrived fast
-cacheInterval = 10
+cacheInterval = 30
 Timer(cacheInterval, keepCacheWarm).start()
 
 
