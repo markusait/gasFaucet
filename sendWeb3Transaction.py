@@ -11,7 +11,7 @@ from functools import partial
 from threading import Timer
 import timeit
 
-cacheInterval = 30
+cacheInterval = 60
 blocksToCache = 150
 #connection to node
 w3 = Web3(Web3.HTTPProvider(ROPSTEN_URL))
