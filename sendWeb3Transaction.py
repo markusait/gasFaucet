@@ -1,4 +1,4 @@
-from config import ETH_PRIVATE_KEY, ROPSTEN_URL, MAINNET_URL
+from config import ETH_PRIVATE_KEY, ROPSTEN_URL, MAINNET_URL, CACHE_INTERVAL
 from web3 import Web3, HTTPProvider, middleware
 from web3.auto import w3
 from web3.middleware import geth_poa_middleware
@@ -26,7 +26,7 @@ class Web3Transaction():
         #web3 instance connecting to node
         self.w3 = Web3(Web3.HTTPProvider(ROPSTEN_URL))
 	# caching Parameters
-        self.cacheInterval = 30
+        self.cacheInterval = CACHE_INTERVAL
         self.blocksToCache = 150
 
         # adding caching middle ware with LRU Cache and 150 items
