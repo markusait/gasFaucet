@@ -1,4 +1,4 @@
-from sendWeb3Transaction import sendTransaction, keepCacheWarm
+from sendWeb3Transaction import Web3Transaction
 from config import APP_KEY
 from flask import Flask, jsonify, request, abort, render_template, flash
 from wtforms import Form, TextField, TextAreaField, validators, StringField, SubmitField, SelectField
@@ -9,8 +9,9 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = APP_KEY
 
 #keeping the cache warm so gas prices can be retrived fast
-cacheInterval = 60
-Timer(cacheInterval, keepCacheWarm).start()
+cacheInterval = 30
+Timer(cacheInterval, Web3Transaction.keepCacheWarm).start()
+
 
 
 
@@ -31,7 +32,7 @@ def home():
          ethaddress = request.form['ethaddress']
          gasNeeded = int(request.form['gasNeeded'])
     if form.validate():
-         response = sendTransaction(gasNeeded, speed, ethaddress)
+         response = Web3Transaction.sendTransaction(gasNeeded, speed, ethaddress)
          flash(response)
     else:
          flash('Error: All the form fields are required. ')
@@ -59,12 +60,14 @@ def returnQuery():
         gasNeeded = int(request.args.get('gas_needed'))
         address = request.args.get('public_address')
         speed = request.args.get('tx_speed')
-        response = sendTransaction(gasNeeded, speed, address)
+        response = Web3Transaction.sendTransaction(gasNeeded, speed, address)
         return jsonify(response)
     # handleing exceptions
-    except Exception:
+    except Exception as ex:
+        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+        message = template.format(type(ex).__name__, ex.args)
         #return jsonify(sendTransaction(gasNeeded, speed, address))
-        raise InvalidUsage('Invalid input sent', status_code=400)
+        raise InvalidUsage(message, status_code=400)
 
 
 #handeling invalid routes
