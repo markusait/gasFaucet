@@ -1,15 +1,18 @@
+from sendWeb3Transaction import Web3Transaction
+from config import APP_KEY, CACHE_INTERVAL
 from flask import Flask, jsonify, request, abort, render_template, flash
-from sendWeb3Transaction import sendTransaction, keepCacheWarm
 from wtforms import Form, TextField, TextAreaField, validators, StringField, SubmitField, SelectField
 from threading import Timer
 
 app = Flask(__name__)
 
-app.config['SECRET_KEY'] = '7d441f27d441f27567d441f2b6176a'
+app.config['SECRET_KEY'] = APP_KEY
 
-#keeping the cache warm so gas prices can be retrived fast
-cacheInterval = 60
-Timer(cacheInterval, keepCacheWarm).start()
+
+#new Tx instance to make sure the prices are kept updated
+newTx = Web3Transaction()
+#keeping the prices up to date
+Timer(CACHE_INTERVAL, newTx.keepCacheWarm).start()
 
 
 
@@ -30,7 +33,7 @@ def home():
          ethaddress = request.form['ethaddress']
          gasNeeded = int(request.form['gasNeeded'])
     if form.validate():
-         response = sendTransaction(gasNeeded, speed, ethaddress)
+         response = newTx.sendTransaction(gasNeeded, speed, ethaddress)
          flash(response)
     else:
          flash('Error: All the form fields are required. ')
@@ -58,12 +61,14 @@ def returnQuery():
         gasNeeded = int(request.args.get('gas_needed'))
         address = request.args.get('public_address')
         speed = request.args.get('tx_speed')
-        response = sendTransaction(gasNeeded, speed, address)
+        response = newTx.sendTransaction(gasNeeded, speed, address)
         return jsonify(response)
     # handleing exceptions
-    except Exception:
+    except Exception as ex:
+        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+        message = template.format(type(ex).__name__, ex.args)
         #return jsonify(sendTransaction(gasNeeded, speed, address))
-        raise InvalidUsage('Invalid input sent', status_code=400)
+        raise InvalidUsage(message, status_code=400)
 
 
 #handeling invalid routes
