@@ -12,8 +12,6 @@ from functools import partial
 from threading import Timer
 import timeit
 
-
-
 class Web3Transaction():
     def __init__(self):
         #web3 instance connecting to node
