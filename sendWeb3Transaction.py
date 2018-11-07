@@ -13,8 +13,12 @@ from threading import Timer
 import timeit
 
 
+
 class Web3Transaction():
     def __init__(self):
+        #web3 instance connecting to node
+        self.w3 = Web3(Web3.HTTPProvider(ROPSTEN_URL))
+        #self.w3 = Web3(Web3.HTTPProvider('http://localhost:8545'))
         #Account initalization with priavte Key
         self.acct = Account.privateKeyToAccount(ETH_PRIVATE_KEY)
         #tx object parameters
@@ -23,18 +27,25 @@ class Web3Transaction():
         self.chainId = 3
         #Cache with 3 categories fast, medium ,slow
         self.priceCache = priceCache = Cache(maxsize=3)
-        #web3 instance connecting to node
-        self.w3 = Web3(Web3.HTTPProvider(ROPSTEN_URL))
 	# caching Parameters
         self.cacheInterval = CACHE_INTERVAL
         self.blocksToCache = 150
 
         # adding caching middle ware with LRU Cache and 150 items
-        block_hash_cache_middleware = construct_simple_cache_middleware(
+        self.block_hash_cache_middleware = construct_simple_cache_middleware(
             cache_class=partial(LRUCache, self.blocksToCache),
             rpc_whitelist='eth_getBlockByHash'
         )
-        self.w3.middleware_stack.add(block_hash_cache_middleware)
+        self.w3.middleware_stack.add(self.block_hash_cache_middleware)
+
+
+    def checkConnection(self):
+        print(self.w3)
+        try:
+            version = self.w3.version.node
+            print(version)
+        except:
+            print('error')
 
 
     def keepCacheWarm(self):
@@ -82,3 +93,6 @@ class Web3Transaction():
             template = "An exception of type {0} occurred. Arguments:\n{1!r}"
             message = template.format(type(ex).__name__, ex.args)
             return {message}
+
+#newTx = Web3Transaction()
+#newTx.checkConnection()
