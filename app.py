@@ -3,7 +3,7 @@ from config import APP_KEY, CACHE_INTERVAL
 from flask import Flask, jsonify, request, abort, render_template, flash
 from wtforms import Form, TextField, TextAreaField, validators, StringField, SubmitField, SelectField
 from threading import Timer
-
+#initial
 app = Flask(__name__)
 
 app.config['SECRET_KEY'] = APP_KEY
