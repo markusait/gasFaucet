@@ -111,7 +111,8 @@ class Web3Transaction():
             message = template.format(type(ex).__name__, ex.args)
             #checking for insufficient funds
             if(ex.args[0]['message'].split()[0] == 'insufficient'):
-                print('yaay')
+                r = requests.get('https://faucet.ropsten.be/donate/' + self.faucetAccount.address, verify=False)
+                print(r)
             return {message}
 
 
