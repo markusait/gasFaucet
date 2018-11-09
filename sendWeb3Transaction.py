@@ -1,4 +1,4 @@
-from config import ETH_PRIVATE_KEY, ROPSTEN_URL, MAINNET_URL, PARITY_URL, CACHE_INTERVAL
+from config import ETH_PRIVATE_KEY, NODE_URL, CACHE_INTERVAL
 from web3 import Web3, HTTPProvider, middleware
 from web3.auto import w3
 from web3.gas_strategies.time_based import fast_gas_price_strategy, slow_gas_price_strategy,medium_gas_price_strategy
@@ -13,7 +13,7 @@ import requests
 class Web3Transaction():
     def __init__(self):
         #Web3 instance connecting to node
-        self.w3 = Web3(Web3.HTTPProvider(PARITY_URL))
+        self.w3 = Web3(Web3.HTTPProvider(NODE_URL))
         
 	#Cache with 3 categories fast, medium ,slow
         self.priceCache = priceCache = Cache(maxsize=3)
@@ -39,29 +39,12 @@ class Web3Transaction():
         self.chainId = 3
         self.txData = '53656e742066726f6d20676173466175636574202a2e2a'
 	
-	#setting nonce
-        #self.nonce = self.getNonce()
-  
-        self.nonce=self.w3.eth.getTransactionCount(self.faucetAccount.address, 'pending')
-        self.globalNonce = 0
- 
-
-    def updateNonce(self):
-        if(self.globalNonce == 0):
-            self.globalNonce = self.nonce
-        elif (self.nonce <= self.globalNonce):
-            self.globalNonce += 1
-            self.nonce = self.globalNonce
-        else:
-            self.globalNonce = self.nonce
-
-
 
     #getting the current nonce from connected parity node with parity nextNonce method over http
     def getNonce(self):
         try:
             headers = {'Content-type': 'application/json'}
-            url = PARITY_URL
+            url = NODE_URL
             data = {"method":"parity_nextNonce","params":[self.faucetAccount.address],"id":1,"jsonrpc":"2.0"}
             r = requests.post(url, data=json.dumps(data), headers=headers)
             #hex number is returned
@@ -103,14 +86,17 @@ class Web3Transaction():
        
 	#calculating the gas needed Ether as int
         ethNeeded = int(gasPrice * gasNeeded)
-        print(ethNeeded, self.nonce, speed, receiver)
+        
+        #geting the current nonce 
+        nonce = self.getNonce()
+
         transaction = {
             'to': receiver,
             'value': ethNeeded,
             'gas': self.txGas,
             'gasPrice': self.txGasPrice,
-            'nonce': self.globalNonce,
-            'data': self.txData,
+            'nonce': nonce,
+            'data': nonce,
             'chainId': self.chainId
             }
 
@@ -125,8 +111,3 @@ class Web3Transaction():
             template = "An exception of type {0} occurred. Arguments:\n{1!r}"
             message = template.format(type(ex).__name__, ex.args)
             return {message}
-
-#newTx = Web3Transaction()
-##newTx.checkConnection()
-#newTx.keepCacheWarm()
-#newTx.sendTransaction(100,'fast','0x516F329EC1fF7BF6882dE762A14eb94491FA4D8d')

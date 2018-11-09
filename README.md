@@ -31,7 +31,8 @@ available parameters are:
 `public_address` (valid ethereum address)
 
 
-you can swith to the infura branch to quickly test it otherwise you can run a local parity node 
+you can switch to the infura branch to quickly test with an INURA node 
+otherwise you can run a local parity node 
 
 
 example GET request:
