@@ -55,23 +55,6 @@ class Web3Transaction():
         else:
             self.globalNonce = self.nonce
 
-
-
-    #getting the current nonce from connected parity node with parity nextNonce method over http
-    def getNonce(self):
-        try:
-            headers = {'Content-type': 'application/json'}
-            url = PARITY_URL
-            data = {"method":"parity_nextNonce","params":[self.faucetAccount.address],"id":1,"jsonrpc":"2.0"}
-            r = requests.post(url, data=json.dumps(data), headers=headers)
-            #hex number is returned
-            hexNum = r.json()['result']
-            return int(hexNum, 0)
-        except Exception as ex:
-            template = "An exception of type {0} occurred. Arguments:\n{1!r}"
-            message = template.format(type(ex).__name__, ex.args)
-            return {message}
-
     #Connection checking
     def checkConnection(self):
         print(self.w3)
@@ -103,7 +86,6 @@ class Web3Transaction():
        
 	#calculating the gas needed Ether as int
         ethNeeded = int(gasPrice * gasNeeded)
-        print(ethNeeded, self.nonce, speed, receiver)
         transaction = {
             'to': receiver,
             'value': ethNeeded,
@@ -125,8 +107,3 @@ class Web3Transaction():
             template = "An exception of type {0} occurred. Arguments:\n{1!r}"
             message = template.format(type(ex).__name__, ex.args)
             return {message}
-
-#newTx = Web3Transaction()
-##newTx.checkConnection()
-#newTx.keepCacheWarm()
-#newTx.sendTransaction(100,'fast','0x516F329EC1fF7BF6882dE762A14eb94491FA4D8d')
