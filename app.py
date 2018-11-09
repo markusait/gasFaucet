@@ -59,55 +59,46 @@ class ApiInputs(Inputs):
         ]
         }
 
-
-
-
-
+# Front end
 @app.route('/', methods=['GET', 'POST'])
 def home():
-    form = ReusableForm(request.form)
-    print(form.errors)
-    if request.method == 'POST':
-         speed = request.form['speed']
-         ethaddress = request.form['ethaddress']
+ form = ReusableForm(request.form)
+ if request.method == 'POST':
+     if form.validate():
+
          gasNeeded = int(request.form['gasNeeded'])
-    if form.validate():
-         response = newTx.sendTransaction(gasNeeded, speed, ethaddress)
-         flash(response)
-    else:
-         flash('Error: All the form fields are required. ')
-    return render_template('home.html', form=form)
+         address = request.form['address']
+         speed = request.form['speed']
+         response = newTx.sendTransaction(gasNeeded, speed, address)
+
+         flash(response['link'])
+     else:
+         flash(form.errors, 'Error')
+ return render_template('home.html', form=form)
 
 
-
-
-
-
-# handeling parameters
+# API endpoint
 @app.route('/fill-wallet-for-gas', methods=['GET'])
 def returnQuery():
-    # print(request.query_string)
-    # args = request.args.to_dict()
-    # handeling invalid request parameter
-    if not request.args.get('gas_needed'):
-        raise InvalidUsage('gas_needed property incorrect', status_code=400)
-    if not request.args.get('public_address'):
-        raise InvalidUsage(
-            'public_address  property incorrect', status_code=400)
-    if not request.args.get('tx_speed'):
-        raise InvalidUsage('tx_speed property incorrect', status_code=400)
+    inputs = ApiInputs(request)
+    if not inputs.validate():
+        return jsonify(success=False, errors=inputs.errors)
     try:
         gasNeeded = int(request.args.get('gas_needed'))
         address = request.args.get('public_address')
         speed = request.args.get('tx_speed')
         response = newTx.sendTransaction(gasNeeded, speed, address)
         return jsonify(response)
-    # handleing exceptions
+    # handleing Transaction exceptions
     except Exception as ex:
         template = "An exception of type {0} occurred. Arguments:\n{1!r}"
         message = template.format(type(ex).__name__, ex.args)
-        #return jsonify(sendTransaction(gasNeeded, speed, address))
-        raise InvalidUsage(message, status_code=400)
+        return jsonify(success=False, errors=message)
+
+
+
+
+
 
 
 #handeling invalid routes
