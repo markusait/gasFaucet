@@ -3,10 +3,11 @@
 ---
 Calculating how much Ether should be sent to a wallet depending on requested gas price, gas amount and confirmation time.
 
+Working [website](https://api.digitpay.de/)
 
 __Installation__
 
-install dependences
+install dependencies
 
 `pip3 install -r requirements.txt`
 
@@ -34,6 +35,8 @@ available parameters are:
 you can switch to the infura branch to quickly test with an INURA node 
 otherwise you can run a local parity node 
 
+when testing you can run the testScript.py to fire request at your localhost.
+The app takes upto 30 seconds before it can return the first gas prices.
 
 example GET request:
 

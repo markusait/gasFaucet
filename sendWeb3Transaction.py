@@ -96,12 +96,11 @@ class Web3Transaction():
             'gas': self.txGas,
             'gasPrice': self.txGasPrice,
             'nonce': nonce,
-            'data': nonce,
+            'data': self.txData,
             'chainId': self.chainId
             }
 
         try:
-            self.updateNonce()
             signed = Account.signTransaction(transaction, self.faucetAccount.privateKey)
             gweiGasPrice = "%.2f" % (gasPrice / 10 ** 9)
             txHash = (self.w3.eth.sendRawTransaction(signed.rawTransaction)).hex()
