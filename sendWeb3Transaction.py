@@ -82,14 +82,14 @@ class Web3Transaction():
     def sendTransaction(self,gasNeeded, speed, receiver):
 
         #getting the current gasPrice
-        gasPrice = self.priceCache.__getitem__(speed)
-       
+        #gasPrice = self.priceCache.__getitem__(speed)
+        gasPrice = 10
 	#calculating the gas needed Ether as int
         ethNeeded = int(gasPrice * gasNeeded)
         
         #geting the current nonce 
-        nonce = self.getNonce()
-
+        #nonce = self.getNonce()
+        nonce = 0
         transaction = {
             'to': receiver,
             'value': ethNeeded,
@@ -109,4 +109,13 @@ class Web3Transaction():
         except Exception as ex:
             template = "An exception of type {0} occurred. Arguments:\n{1!r}"
             message = template.format(type(ex).__name__, ex.args)
+            #checking for insufficient funds
+            if(ex.args[0]['message'].split()[0] == 'insufficient'):
+                print('yaay')
             return {message}
+
+
+
+newTx  = Web3Transaction()
+#newTx.keepCacheWarm()
+print(newTx.sendTransaction(10,'fast','0x2621ea417659Ad69bAE66af05ebE5788E533E5e7'))
