@@ -1,4 +1,4 @@
-from config import ETH_PRIVATE_KEY, ROPSTEN_URL, MAINNET_URL, CACHE_INTERVAL
+from config import ETH_PRIVATE_KEY, ROPSTEN_URL, MAINNET_URL, PARITY_URL, CACHE_INTERVAL
 from web3 import Web3, HTTPProvider, middleware
 from web3.auto import w3
 from web3.middleware import geth_poa_middleware
@@ -14,27 +14,34 @@ import timeit
 
 class Web3Transaction():
     def __init__(self):
-        #web3 instance connecting to node
-        self.w3 = Web3(Web3.HTTPProvider(ROPSTEN_URL))
-        #self.w3 = Web3(Web3.HTTPProvider('http://localhost:8545'))
-        #Account initalization with priavte Key
-        self.acct = Account.privateKeyToAccount(ETH_PRIVATE_KEY)
-        #tx object parameters
-        self.txGas = 314150
-        self.txGasPrice = 20000000000
-        self.chainId = 3
-        #Cache with 3 categories fast, medium ,slow
+        #Web3 instance connecting to node
+        self.w3 = Web3(Web3.HTTPProvider(PARITY_URL))
+        
+	#Cache with 3 categories fast, medium ,slow
         self.priceCache = priceCache = Cache(maxsize=3)
-	# caching Parameters
+        
+	#Caching Parameters
         self.cacheInterval = CACHE_INTERVAL
         self.blocksToCache = 150
-
-        # adding caching middle ware with LRU Cache and 150 items
+        
+	# Construct Cache with  with LRU Cache and 150 items
         self.block_hash_cache_middleware = construct_simple_cache_middleware(
             cache_class=partial(LRUCache, self.blocksToCache),
             rpc_whitelist='eth_getBlockByHash'
         )
-        self.w3.middleware_stack.add(self.block_hash_cache_middleware)
+    	#Adding caching to middle ware
+	self.w3.middleware_stack.add(self.block_hash_cache_middleware)
+
+        #Faucet Account initalization with priavte Key
+        self.faucetAccount = Account.privateKeyToAccount(ETH_PRIVATE_KEY)
+	
+	#Transaction parameters of faucet
+        self.txGas = 314150
+        self.txGasPrice = 20000000000
+        self.chainId = 3
+	#setting nonce
+        self.nonce=self.w3.eth.getTransactionCount(self.faucetAccount.address, 'pending')
+        self.globalNonce = 0
 
 
     def checkConnection(self):
@@ -69,7 +76,7 @@ class Web3Transaction():
         ethNeeded = int(gasPrice * gasNeeded)
         #making sure receiver is a eth address todo: implement try, excepet
         print(is_hex_address(receiver))
-        nonce=self.w3.eth.getTransactionCount(self.acct.address, 'pending')
+        nonce=self.w3.eth.getTransactionCount(self.faucetAccount.address, 'pending')
 
         transaction = {
             'to': receiver,
@@ -82,7 +89,7 @@ class Web3Transaction():
             }
 
         try:
-            signed = Account.signTransaction(transaction, self.acct.privateKey)
+            signed = Account.signTransaction(transaction, self.faucetAccount.privateKey)
             gweiGasPrice = "%.2f" % (gasPrice / 10 ** 9)
             txHash = (self.w3.eth.sendRawTransaction(signed.rawTransaction)).hex()
             return {"message": "successful",  "txHash":txHash,"gasPrice in Gwei": gweiGasPrice,"Eth sent in Wei":ethNeeded, "link": "https://ropsten.etherscan.io/tx/" + txHash}
