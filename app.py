@@ -3,16 +3,38 @@ from config import APP_KEY, CACHE_INTERVAL
 from flask import Flask, jsonify, request, abort, render_template, flash
 from wtforms import Form, TextField, TextAreaField, validators, StringField, SubmitField, SelectField
 from threading import Timer
-#initial
-app = Flask(__name__)
 
+
+
+#Initializing Flask 
+app = Flask(__name__)
 app.config['SECRET_KEY'] = APP_KEY
 
-
-#new Tx instance to make sure the prices are kept updated
+#new Transaction instance and interval time to make sure the prices are up to date
 newTx = Web3Transaction()
-#keeping the prices up to date
 Timer(CACHE_INTERVAL, newTx.keepCacheWarm).start()
+
+#General parameter validation
+class InputValidation(Form):
+      def validate_address(form, field):
+         address = str(field.data)
+         if (not is_hex_address(address)):
+             raise ValidationError('Error: Please provide a valid Ethereum address')
+      def validate_gas(form, field):
+          try:
+             gasNeeded =  int(field.data)
+             if gasNeeded < 1 or gasNeeded > 8000000:
+                 raise ValidationError('Please provide a positive integer between 1 and 8 000 000')
+          except ValueError:
+             raise ValidationError('Error: Please provide a positive integer')
+
+      def validate_speed(form, field):
+           speed = str(field.data)
+           speedParams = ['slow','medium','fast']
+           if(not speed in str(speedParams)):
+               raise ValidationError('Error: Please provide a valid speed parameter (fast, medium or slow)')
+ 
+
 
 
 
