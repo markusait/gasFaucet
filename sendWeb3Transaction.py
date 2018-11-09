@@ -40,7 +40,22 @@ class Web3Transaction():
         self.txData = '53656e742066726f6d20676173466175636574202a2e2a'
 	
 	#setting nonce
-        self.nonce = self.getNonce()
+        #self.nonce = self.getNonce()
+  
+        self.nonce=self.w3.eth.getTransactionCount(self.faucetAccount.address, 'pending')
+        self.globalNonce = 0
+ 
+
+    def updateNonce(self):
+        if(self.globalNonce == 0):
+            self.globalNonce = self.nonce
+        elif (self.nonce <= self.globalNonce):
+            self.globalNonce += 1
+            self.nonce = self.globalNonce
+        else:
+            self.globalNonce = self.nonce
+
+
 
     #getting the current nonce from connected parity node with parity nextNonce method over http
     def getNonce(self):
@@ -94,12 +109,13 @@ class Web3Transaction():
             'value': ethNeeded,
             'gas': self.txGas,
             'gasPrice': self.txGasPrice,
-            'nonce': self.getNonce(),
+            'nonce': self.globalNonce,
             'data': self.txData,
             'chainId': self.chainId
             }
 
         try:
+            self.updateNonce()
             signed = Account.signTransaction(transaction, self.faucetAccount.privateKey)
             gweiGasPrice = "%.2f" % (gasPrice / 10 ** 9)
             txHash = (self.w3.eth.sendRawTransaction(signed.rawTransaction)).hex()
@@ -111,6 +127,6 @@ class Web3Transaction():
             return {message}
 
 #newTx = Web3Transaction()
-#newTx.checkConnection()
+##newTx.checkConnection()
 #newTx.keepCacheWarm()
 #newTx.sendTransaction(100,'fast','0x516F329EC1fF7BF6882dE762A14eb94491FA4D8d')
