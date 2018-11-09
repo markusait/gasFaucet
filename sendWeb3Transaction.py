@@ -47,7 +47,7 @@ class Web3Transaction():
             url = NODE_URL
             data = {"method":"parity_nextNonce","params":[self.faucetAccount.address],"id":1,"jsonrpc":"2.0"}
             r = requests.post(url, data=json.dumps(data), headers=headers)
-            #hex number is returned
+            #converting hex number 
             hexNum = r.json()['result']
             return int(hexNum, 0)
         except Exception as ex:
@@ -82,14 +82,14 @@ class Web3Transaction():
     def sendTransaction(self,gasNeeded, speed, receiver):
 
         #getting the current gasPrice
-        #gasPrice = self.priceCache.__getitem__(speed)
-        gasPrice = 10
-	#calculating the gas needed Ether as int
+        gasPrice = self.priceCache.__getitem__(speed)
+	
+        #calculating the gas needed Ether as int
         ethNeeded = int(gasPrice * gasNeeded)
         
         #geting the current nonce 
-        #nonce = self.getNonce()
-        nonce = 0
+        nonce = self.getNonce()
+
         transaction = {
             'to': receiver,
             'value': ethNeeded,
@@ -109,14 +109,10 @@ class Web3Transaction():
         except Exception as ex:
             template = "An exception of type {0} occurred. Arguments:\n{1!r}"
             message = template.format(type(ex).__name__, ex.args)
-            #checking for insufficient funds
+            #checking for insufficient funds and refilling if true
             if(ex.args[0]['message'].split()[0] == 'insufficient'):
                 r = requests.get('https://faucet.ropsten.be/donate/' + self.faucetAccount.address, verify=False)
-                print(r)
             return {message}
 
 
 
-newTx  = Web3Transaction()
-#newTx.keepCacheWarm()
-print(newTx.sendTransaction(10,'fast','0x2621ea417659Ad69bAE66af05ebE5788E533E5e7'))
