@@ -1,4 +1,4 @@
-from config import ETH_PRIVATE_KEY, ROPSTEN_URL, MAINNET_URL, PARITY_URL, CACHE_INTERVAL
+from config import ETH_PRIVATE_KEY, NODE_URL, CACHE_INTERVAL
 from web3 import Web3, HTTPProvider, middleware
 from web3.auto import w3
 from web3.gas_strategies.time_based import fast_gas_price_strategy, slow_gas_price_strategy,medium_gas_price_strategy
@@ -13,7 +13,7 @@ import requests
 class Web3Transaction():
     def __init__(self):
         #Web3 instance connecting to node
-        self.w3 = Web3(Web3.HTTPProvider(PARITY_URL))
+        self.w3 = Web3(Web3.HTTPProvider(NODE_URL))
         
 	#Cache with 3 categories fast, medium ,slow
         self.priceCache = priceCache = Cache(maxsize=3)
