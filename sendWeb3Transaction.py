@@ -1,16 +1,14 @@
 from config import ETH_PRIVATE_KEY, ROPSTEN_URL, MAINNET_URL, PARITY_URL, CACHE_INTERVAL
 from web3 import Web3, HTTPProvider, middleware
 from web3.auto import w3
-from web3.middleware import geth_poa_middleware
 from web3.gas_strategies.time_based import fast_gas_price_strategy, slow_gas_price_strategy,medium_gas_price_strategy
-from web3.gas_strategies.rpc import rpc_gas_price_strategy
 from web3.middleware.cache import construct_simple_cache_middleware
 from eth_account import Account
-from eth_utils import is_hex_address
 from cachetools import LRUCache, Cache
 from functools import partial
 from threading import Timer
-import timeit
+import json
+import requests
 
 class Web3Transaction():
     def __init__(self):
@@ -42,8 +40,22 @@ class Web3Transaction():
         self.txData = '53656e742066726f6d20676173466175636574202a2e2a'
 	
 	#setting nonce
-        self.nonce=self.w3.eth.getTransactionCount(self.faucetAccount.address, 'pending')
-        self.globalNonce = 0
+        self.nonce = self.getNonce()
+
+    #getting the current nonce from connected parity node with parity nextNonce method over http
+    def getNonce(self):
+        try:
+            headers = {'Content-type': 'application/json'}
+            url = PARITY_URL
+            data = {"method":"parity_nextNonce","params":[self.faucetAccount.address],"id":1,"jsonrpc":"2.0"}
+            r = requests.post(url, data=json.dumps(data), headers=headers)
+            #hex number is returned
+            hexNum = r.json()['result']
+            return int(hexNum, 0)
+        except Exception as ex:
+            template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+            message = template.format(type(ex).__name__, ex.args)
+            return {message}
 
     #Connection checking
     def checkConnection(self):
@@ -74,15 +86,15 @@ class Web3Transaction():
         #getting the current gasPrice
         gasPrice = self.priceCache.__getitem__(speed)
        
-	#getting current nonce 
-        nonce=self.w3.eth.getTransactionCount(self.faucetAccount.address, 'pending')
-
+	#calculating the gas needed Ether as int
+        ethNeeded = int(gasPrice * gasNeeded)
+        print(ethNeeded, self.nonce, speed, receiver)
         transaction = {
             'to': receiver,
             'value': ethNeeded,
             'gas': self.txGas,
             'gasPrice': self.txGasPrice,
-            'nonce': nonce,
+            'nonce': self.getNonce(),
             'data': self.txData,
             'chainId': self.chainId
             }
@@ -98,5 +110,7 @@ class Web3Transaction():
             message = template.format(type(ex).__name__, ex.args)
             return {message}
 
-newTx = Web3Transaction()
-newTx.checkConnection()
+#newTx = Web3Transaction()
+#newTx.checkConnection()
+#newTx.keepCacheWarm()
+#newTx.sendTransaction(100,'fast','0x516F329EC1fF7BF6882dE762A14eb94491FA4D8d')
