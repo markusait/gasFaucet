@@ -30,7 +30,7 @@ class Web3Transaction():
             rpc_whitelist='eth_getBlockByHash'
         )
     	#Adding caching to middle ware
-	self.w3.middleware_stack.add(self.block_hash_cache_middleware)
+        self.w3.middleware_stack.add(self.block_hash_cache_middleware)
 
         #Faucet Account initalization with priavte Key
         self.faucetAccount = Account.privateKeyToAccount(ETH_PRIVATE_KEY)
@@ -39,20 +39,21 @@ class Web3Transaction():
         self.txGas = 314150
         self.txGasPrice = 20000000000
         self.chainId = 3
+        self.txData = '53656e742066726f6d20676173466175636574202a2e2a'
+	
 	#setting nonce
         self.nonce=self.w3.eth.getTransactionCount(self.faucetAccount.address, 'pending')
         self.globalNonce = 0
 
-
+    #Connection checking
     def checkConnection(self):
         print(self.w3)
         try:
             version = self.w3.version.node
-            print(version)
         except:
-            print('error')
+            print('error, not connected')
 
-
+    #Keeping middle ware cache warm and update prices quickly
     def keepCacheWarm(self):
 
         self.w3.eth.setGasPriceStrategy(fast_gas_price_strategy)
@@ -72,10 +73,8 @@ class Web3Transaction():
 
         #getting the current gasPrice
         gasPrice = self.priceCache.__getitem__(speed)
-        #making sure ethNeeded is an int
-        ethNeeded = int(gasPrice * gasNeeded)
-        #making sure receiver is a eth address todo: implement try, excepet
-        print(is_hex_address(receiver))
+       
+	#getting current nonce 
         nonce=self.w3.eth.getTransactionCount(self.faucetAccount.address, 'pending')
 
         transaction = {
@@ -84,8 +83,8 @@ class Web3Transaction():
             'gas': self.txGas,
             'gasPrice': self.txGasPrice,
             'nonce': nonce,
-            'data': '53656e742066726f6d20676173466175636574202a2e2a',
-            'chainId': self.chainId,
+            'data': self.txData,
+            'chainId': self.chainId
             }
 
         try:
@@ -99,5 +98,5 @@ class Web3Transaction():
             message = template.format(type(ex).__name__, ex.args)
             return {message}
 
-#newTx = Web3Transaction()
-#newTx.checkConnection()
+newTx = Web3Transaction()
+newTx.checkConnection()
