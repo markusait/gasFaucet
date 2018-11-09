@@ -1,10 +1,11 @@
 from sendWeb3Transaction import Web3Transaction
 from config import APP_KEY, CACHE_INTERVAL
-from flask import Flask, jsonify, request, abort, render_template, flash
-from wtforms import Form, TextField, TextAreaField, validators, StringField, SubmitField, SelectField
+from flask import Flask, jsonify, request, render_template, flash
+from flask_inputs import Inputs
+from wtforms import Form, TextField, validators, SelectField, ValidationError
+from wtforms.validators import DataRequired
 from threading import Timer
-
-
+from eth_utils import is_hex_address
 
 #Initializing Flask 
 app = Flask(__name__)
@@ -35,15 +36,31 @@ class InputValidation(Form):
                raise ValidationError('Error: Please provide a valid speed parameter (fast, medium or slow)')
  
 
-
-
-
-#form for the frontend
+#Front end validation
 class ReusableForm(Form):
-     # speed = SelectField('Speed:',choices = [('fast'), ('medium'),('slow')])
-     speed = TextField('Speed:', validators=[validators.required(), validators.Length(min=3, max=7)])
-     gasNeeded = TextField('GasNeeded:', validators=[validators.required(), validators.Length(min=0, max=30)])
-     ethaddress = TextField('Ethaddress:', validators=[validators.required(), validators.Length(min=39, max=43)])
+     speed = TextField('Speed:', validators=[ InputValidation. validate_speed])
+     gasNeeded = TextField('GasNeeded:', validators=[ InputValidation.validate_gas])
+     address = TextField('Address:', validators=[ InputValidation.validate_address])
+
+#API Validation
+class ApiInputs(Inputs):
+    args = {
+        'gas_needed': [
+            DataRequired('gas_needed parameter is missing or incorrect'),
+            InputValidation.validate_gas
+        ],
+        'tx_speed': [
+            DataRequired('tx_speed parameter is missing or incorrect'),
+            InputValidation.validate_speed
+        ],
+        'public_address': [
+            DataRequired('public_address parameter is missing or incorrect'),
+            InputValidation.validate_address
+        ]
+        }
+
+
+
 
 
 @app.route('/', methods=['GET', 'POST'])
